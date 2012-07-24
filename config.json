@@ -1,0 +1,13 @@
+{
+"authUsers" : ["Bob","Jane"],
+"ircroom" : "#your_irc_server",
+"ircserver" : "irc.irc.org",
+"ircuser" : "bot_name",
+"mysqluser" : "db_user",
+"mysqldatabase" : "database",
+"mysqlpassword" : "db_pass",
+"mysqlsocket" : "/var/run/mysqld/mysqld.sock",
+"AUTH" : "auth+live+XXXXXXXXXXXXXXXXXXXXXX",
+"USERID" : "YYYYYYYYYYYYYYYYYYYYYYYY",
+"ROOMID" : "ZZZZZZZZZZZZZZZZZZZZZZZZ"
+}
