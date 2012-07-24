@@ -78,76 +78,17 @@ OnNewsong = function(data) {
 };
 
 // Fires when a PM is sent to the bot on IRC.
-// Need to remove the logic to a generic function and then do auth checking on both IRC and TT chat that then passes to that generic function.
 OnIRCChat = function(nick,text,message) {
 	console.log(nick);
 	console.log(text);
 	if(nconf.get('authUsers').indexOf(nick) >=0)
 	{
-		if(text == 'Begin DJ')
+		var isValidCommand = text.match(/^!dj (.+)/i);
+		if(isValidCommand)
 		{
-			bot.addDj();
+			var response = DoChatCommand(isValidCommand[1]);
+			client.say(nick,response);
 		}
-		else if(text == 'Stop DJ')
-		{
-			bot.remDj();
-		}
-		else
-		{
-			var command = text.match(/^([^:]*):?\s*(.*)/);
-			if(command) {
-				if(command[1] == "Add Song")
-				{
-				bot.playlistAdd(command[2], function() {
-					bot.playlistAll(function(data){console.log(data);});
-				});
-				}
-				else if (command[1] == "List Queue")
-				{
-					bot.playlistAll(function(data){
-						var songList = data.list;
-						var str = "Response: ";
-						songList.forEach(function(song, index) {
-							var thisSong = song._id;
-							var songName = song.metadata.song;
-							str += '['+index+'] '+ songName;
-						});
-						client.say(nick,str);
-					
-						
-					});
-				
-				}
-				else if(command[1] == "Auth User")
-				{
-					console.log("Adding user "+ command[2] + " by " + nick);
-					var tempUsers = nconf.get('authUsers');
-					tempUsers.push(command[2]);
-					nconf.set('authUsers', tempUsers);
-				}
-				else if(command[1] == "Deauth User")
-				{
-					console.log("Removing user "+ command[2] + " by " + nick);
-					var tempUsers = nconf.get('authUsers');
-					var remUser = tempUsers.indexOf(command[2]);
-					tempUsers.splice(remUser,1);
-					nconf.set('authUsers', tempUsers);
-				}
-				else if(command[1] == "User List")
-				{
-					client.say(nick,nconf.get('authUsers').join());
-				}
-				else if(command[1] == "Mute")
-				{
-					nconf.set('verbose',false);
-				}
-				else if(command[1] == "Unmute")
-				{
-					nconf.set('verbose',true);
-				}
-			}
-		}
-
 	}
 };
 

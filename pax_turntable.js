@@ -36,6 +36,7 @@ connection.connect();
 var Bot = require('ttapi');
 bot = new Bot(nconf.get('AUTH'), nconf.get('USERID'), nconf.get('ROOMID'));
 
+require('./chat.js');
 require('./functions.js');
 
 bot.on('newsong', OnNewsong); 
