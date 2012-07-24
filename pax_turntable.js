@@ -9,7 +9,8 @@ nconf.file('./config.json');
 // Load some defaults
 nconf.defaults({
     'verbose': true,
-    'enforceQueue': false
+    'enforceQueue': false,
+    'irctopic': '\u0002' + playerName + '\u000F: \u0002' + songTitle + '\u000F (\u0002' + songArtist + '\u000F) - http://turntable.fm/4ffb4356eb35c125bd000237'
   });
 
 
@@ -21,6 +22,7 @@ client = new irc.Client(nconf.get('ircserver'), nconf.get('ircuser'), {
 // Connect to our IRC channel once the server gives us the OK
 client.on('registered', function() {
 	client.join(nconf.get('ircroom'));
+	client.say('NickServ', 'identify ' + nconf.get('ircpass'));
 });
 
 // Load mysql module, create connection as a global
@@ -39,6 +41,7 @@ bot = new Bot(nconf.get('AUTH'), nconf.get('USERID'), nconf.get('ROOMID'));
 
 // Declare our main variables
 djQueue = [];
+djList = [];
 
 require('./chat.js');
 require('./functions.js');
@@ -61,3 +64,4 @@ bot.on('snagged', OnSnagged);
 bot.on('pmmed', OnPM);
 
 client.on('pm', OnIRCChat);
+client.on('notice', OnIRCNotice);

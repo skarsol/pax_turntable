@@ -94,8 +94,12 @@ OnNewsong = function(data) {
 
 	bot.getProfile(songPlayer,function(profile) {
 		var playerName = profile.name;
-		var str = '\u0002' + playerName + '\u000F is playing \u0002' + songTitle + '\u000F by \u0002' + songArtist + '\u000F';
-		if(nconf.get('verbose')) client.say(nconf.get('ircroom'),str);
+		var str = nconf.get('irctopic');
+		if(nconf.get('verbose')) 
+		{
+			//client.say(nconf.get('ircroom'),str);<br>
+			client.send('TOPIC', nconf.get('ircroom'), str);
+		}
 
 		connection.query("insert into djs (name,userid) values (" + connection.escape(playerName) + "," + connection.escape(songPlayer)+ ") on duplicate key update id=LAST_INSERT_ID(id), lastHeard = now()", function(err,rows) {
 			playerDBID = rows.insertId;
@@ -168,8 +172,8 @@ IsNextDJ = function(userid) {
 
 // Fires when a PM is sent to the bot on IRC.
 OnIRCChat = function(nick,text,message) {
-	//console.log(nick);
-	//console.log(text);
+	console.log(nick);
+	console.log(text);
 	if(nconf.get('authUsers').indexOf(nick) >=0)
 	{
 		var isValidCommand = text.match(/^!dj (.+)/i);
@@ -181,5 +185,9 @@ OnIRCChat = function(nick,text,message) {
 			
 		}
 	}
+};
+
+OnIRCNotice = function(nick, to, text, message) {
+	console.log(nick + ':' + text);
 };
 
