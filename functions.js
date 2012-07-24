@@ -77,6 +77,20 @@ OnNewsong = function(data) {
 
 };
 
+OnRoomChanged = function(data) {};
+OnRegistered = function(data) {};
+OnDeregistered = function(data) {};
+OnSpeak = function(data) {};
+OnUpdateVotes = function(data) {};
+OnBootedUser = function(data) {};
+OnUpdateUser = function(data) {};
+OnNewModerator = function(data) {};
+OnRemModerator = function(data) {};
+OnSnagged = function(data) {};
+OnPM = function(data) {};
+
+
+
 // Fires when a PM is sent to the bot on IRC.
 OnIRCChat = function(nick,text,message) {
 	console.log(nick);
@@ -86,8 +100,10 @@ OnIRCChat = function(nick,text,message) {
 		var isValidCommand = text.match(/^!dj (.+)/i);
 		if(isValidCommand)
 		{
-			var response = DoChatCommand(isValidCommand[1]);
-			client.say(nick,response);
+			DoChatCommand(nick, isValidCommand[1], function(nick, response) {
+				client.say(nick,response);
+			});
+			
 		}
 	}
 };

@@ -43,6 +43,17 @@ bot.on('newsong', OnNewsong);
 bot.on('endsong', OnEndsong); 
 bot.on('add_dj', OnAddDJ); 
 bot.on('rem_dj', OnRemDJ); 
-bot.on('nosong', OnNosong); 
+bot.on('nosong', OnNosong);
+bot.on('roomChanged', OnRoomChanged);
+bot.on('registered', OnRegistered);
+bot.on('deregistered', OnDeregistered);
+bot.on('speak', OnSpeak);
+bot.on('update_votes', OnUpdateVotes);
+bot.on('booted_user', OnBootedUser);
+bot.on('update_user', OnUpdateUser);
+bot.on('new_moderator', OnNewModerator);
+bot.on('rem_moderator', OnRemModerator);
+bot.on('snagged', OnSnagged);
+bot.on('pmmed', OnPM);
 
 client.on('pm', OnIRCChat);
