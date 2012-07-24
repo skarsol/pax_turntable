@@ -9,8 +9,7 @@ nconf.file('./config.json');
 // Load some defaults
 nconf.defaults({
     'verbose': true,
-    'enforceQueue': false,
-    'irctopic': '\u0002' + playerName + '\u000F: \u0002' + songTitle + '\u000F (\u0002' + songArtist + '\u000F) - http://turntable.fm/4ffb4356eb35c125bd000237'
+    'enforceQueue': false
   });
 
 

@@ -97,6 +97,7 @@ OnNewsong = function(data) {
 		var str = nconf.get('irctopic');
 		if(nconf.get('verbose')) 
 		{
+			var str = nconf.get('ttlink') + ' - \u0002' + songTitle + '\u000F (\u0002' + songArtist + '\u000F) - \u0002' + playerName + '\u000F';
 			//client.say(nconf.get('ircroom'),str);<br>
 			client.send('TOPIC', nconf.get('ircroom'), str);
 		}
