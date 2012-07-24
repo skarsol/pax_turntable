@@ -7,7 +7,7 @@ var songDBID = -1;
 OnAddDJ = function(data) {
 	var playerName = data.user[0].name;
 	var str = '\u0002' + playerName + '\u000F is now on the decks!';
-	//client.say(config.ircroom,str);
+	//client.say(nconf.get('ircroom,str'));
 };
 
 // Fires when a DJ gets off the turntables.
@@ -15,13 +15,13 @@ OnAddDJ = function(data) {
 OnRemDJ = function(data) {
 	var playerName = data.user[0].name;
 	var str = '\u0002' + playerName + '\u000F has given up!';
-	//client.say(config.ircroom,str);
+	//client.say(nconf.get('ircroom,str'));
 };
 
 // Fires when there are no more DJs on the turntables.
 OnNosong = function(data) {
 	var str = '\u0002Oh noes! The room is dead!\u000F';
-	if(config.verbose) client.say(config.ircroom,str);
+	if(nconf.get('verbose')) client.say(nconf.get('ircroom'),str);
 };
 
 // Fires when a song ends before the next song starts playing.
@@ -65,7 +65,7 @@ OnNewsong = function(data) {
 	bot.getProfile(songPlayer,function(profile) {
 		var playerName = profile.name;
 		var str = '\u0002' + playerName + '\u000F is playing \u0002' + songTitle + '\u000F by \u0002' + songArtist + '\u000F';
-		if(config.verbose) client.say(config.ircroom,str);
+		if(nconf.get('verbose')) client.say(nconf.get('ircroom'),str);
 
 		connection.query("insert into djs (name,userid) values (" + connection.escape(playerName) + "," + connection.escape(songPlayer)+ ") on duplicate key update id=LAST_INSERT_ID(id), lastHeard = now()", function(err,rows) {
 			playerDBID = rows.insertId;
@@ -82,7 +82,7 @@ OnNewsong = function(data) {
 OnIRCChat = function(nick,text,message) {
 	console.log(nick);
 	console.log(text);
-	if(config.authUsers.indexOf(nick) >=0)
+	if(nconf.get('authUsers').indexOf(nick) >=0)
 	{
 		if(text == 'Begin DJ')
 		{
@@ -121,25 +121,29 @@ OnIRCChat = function(nick,text,message) {
 				else if(command[1] == "Auth User")
 				{
 					console.log("Adding user "+ command[2] + " by " + nick);
-					config.authUsers.push(command[2]);
+					var tempUsers = nconf.get('authUsers');
+					tempUsers.push(command[2]);
+					nconf.set('authUsers', tempUsers);
 				}
 				else if(command[1] == "Deauth User")
 				{
 					console.log("Removing user "+ command[2] + " by " + nick);
-					var remUser = config.authUsers.indexOf(command[2]);
-					config.authUsers.splice(remUser,1);
+					var tempUsers = nconf.get('authUsers');
+					var remUser = tempUsers.indexOf(command[2]);
+					tempUsers.splice(remUser,1);
+					nconf.set('authUsers', tempUsers);
 				}
 				else if(command[1] == "User List")
 				{
-					client.say(nick,config.authUsers.join());
+					client.say(nick,nconf.get('authUsers').join());
 				}
 				else if(command[1] == "Mute")
 				{
-					config.verbose = false;
+					nconf.set('verbose',false);
 				}
 				else if(command[1] == "Unmute")
 				{
-					config.verbose = true;
+					nconf.set('verbose',true);
 				}
 			}
 		}
