@@ -6,7 +6,27 @@ var songDBID = -1;
 // Does nothing currently.
 OnAddDJ = function(data) {
 	var playerName = data.user[0].name;
-	var str = '\u0002' + playerName + '\u000F is now on the decks!';
+	var userid = data.user[0].userid;
+	if(nconf.get('enforceQueue'))
+	{
+		if(djQueue.length > 0 && djList.length >= 4)
+		{
+			if(isNextDJ(userid))
+			{
+				djQueue.pop();
+			}
+			else
+			{
+				// remove the offender
+				bot.remDj(userid);
+				bot.speak('Sorry ' + playerName + '. That spot is still reserved for ' + djQueue[0].name);
+				return;
+			}
+		}
+	}
+	djList.push(data.user[0]);
+	//console.log(JSON.stringify(djList));
+	//var str = '\u0002' + playerName + '\u000F is now on the decks!';
 	//client.say(nconf.get('ircroom,str'));
 };
 
@@ -14,7 +34,17 @@ OnAddDJ = function(data) {
 // Does nothing currently.
 OnRemDJ = function(data) {
 	var playerName = data.user[0].name;
-	var str = '\u0002' + playerName + '\u000F has given up!';
+	var userid = data.user[0].userid;
+	
+	var newList = djList;
+	djList.forEach(function(dj, index) {
+		if(dj.userid == userid){
+			newList.splice(index,1);
+		}
+	});
+	djList = newList;
+	//console.log(JSON.stringify(djList));
+	//var str = '\u0002' + playerName + '\u000F has given up!';
 	//client.say(nconf.get('ircroom,str'));
 };
 
@@ -77,10 +107,34 @@ OnNewsong = function(data) {
 
 };
 
-OnRoomChanged = function(data) {};
+OnRoomChanged = function(data) {
+	data.room.metadata.djs.forEach(function(dj) {
+		bot.getProfile(dj, function(profile) {
+			djList.push(profile); 
+			//console.log(JSON.stringify(djList));
+		});
+	});
+};
 OnRegistered = function(data) {};
 OnDeregistered = function(data) {};
-OnSpeak = function(data) {};
+OnSpeak = function(data) {
+	var userid = data.userid;
+	var nick = data.name;
+	var text = data.text;
+	
+	var isValidCommand = text.match(/^!dj (.+)/i);
+	if(isValidCommand)
+		{
+			if(isValidCommand[1] == "q+") AddToQueue(data);
+			else if(isValidCommand[1] == "q-") RemFromQueue(data);
+			else {		
+			DoChatCommand(userid, isValidCommand[1], function(userid, response) {
+				bot.pm(response,userid);
+			});
+			}
+			
+		}
+};
 OnUpdateVotes = function(data) {};
 OnBootedUser = function(data) {};
 OnUpdateUser = function(data) {};
@@ -89,12 +143,33 @@ OnRemModerator = function(data) {};
 OnSnagged = function(data) {};
 OnPM = function(data) {};
 
+// DJ Queue Functions
+AddToQueue = function(person) {
+	djQueue.push(person);
+	//console.log(JSON.stringify(djQueue));
+};
+
+RemFromQueue = function(person) {
+	var newQueue = djQueue;
+	djQueue.forEach(function(dj, index) {
+		if(dj.userid == person.userid){
+			newQueue.splice(index,1);
+		}
+	});
+	djQueue = newQueue;
+	//console.log(JSON.stringify(djQueue));
+};
+IsNextDJ = function(userid) {
+	if(djQueue[0].userid == userid) return true;
+	else return false;
+}
+
 
 
 // Fires when a PM is sent to the bot on IRC.
 OnIRCChat = function(nick,text,message) {
-	console.log(nick);
-	console.log(text);
+	//console.log(nick);
+	//console.log(text);
 	if(nconf.get('authUsers').indexOf(nick) >=0)
 	{
 		var isValidCommand = text.match(/^!dj (.+)/i);
