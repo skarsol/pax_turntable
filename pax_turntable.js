@@ -8,7 +8,8 @@ nconf.file('./config.json');
 
 // Load some defaults
 nconf.defaults({
-    'verbose': true
+    'verbose': true,
+    'enforceQueue': false
   });
 
 
@@ -35,6 +36,9 @@ connection.connect();
 // Load the ttapi module, create the bot as a global
 var Bot = require('ttapi');
 bot = new Bot(nconf.get('AUTH'), nconf.get('USERID'), nconf.get('ROOMID'));
+
+// Declare our main variables
+djQueue = [];
 
 require('./chat.js');
 require('./functions.js');
