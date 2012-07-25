@@ -1,13 +1,25 @@
-DoChatCommand = function(text) {
+DoChatCommand = function(nick, text, cb) {
+	var str = "I did nothing!";
+	
 	if(text == 'Begin DJ')
 	{
 		bot.addDj();
-		return("Starting to DJ!");
+		str = "Starting to DJ!";
 	}
 	else if(text == 'Stop DJ')
 	{
 		bot.remDj();
-		return("Not gonna DJ no mo'!");
+		str = "Not gonna DJ no mo'!";
+	}
+	else if(text == 'Add Song')
+	{
+		AddRandomSong();
+		str = "Adding a song.";
+	}
+	else if(text == 'Rem Song')
+	{
+		RemLastSongFromQueue();
+		str = "Removing a song.";
 	}
 	else if(text == "Auth User")
 	{
@@ -15,7 +27,7 @@ DoChatCommand = function(text) {
 		var tempUsers = nconf.get('authUsers');
 		tempUsers.push(command[2]);
 		nconf.set('authUsers', tempUsers);
-		return("Added " + command[2] + " to the Authorized Users list.")
+		str = "Added " + command[2] + " to the Authorized Users list.";
 	}
 	else if(text == "Deauth User")
 	{
@@ -24,21 +36,35 @@ DoChatCommand = function(text) {
 		var remUser = tempUsers.indexOf(command[2]);
 		tempUsers.splice(remUser,1);
 		nconf.set('authUsers', tempUsers);
-		return("Removed " + command[2] + " from the Authorized Users list.");
+		str = "Removed " + command[2] + " from the Authorized Users list.";
 	}
 	else if(text == "User List")
 	{
-		return(nick,nconf.get('authUsers').join());
+		str = nconf.get('authUsers').join();
 	}
 	else if(text == "Mute")
 	{
 		nconf.set('verbose',false);
-		return("Muted");
+		str = "Muted";
 	}
 	else if(text == "Unmute")
 	{
 		nconf.set('verbose',true);
-		return("Unmuted");
+		str = "Unmuted";
+	}
+	else if(text == "List Queue")
+	{
+		bot.playlistAll(function(data){
+			var songList = data.list;
+			str = "";
+			songList.forEach(function(song, index) {
+				var thisSong = song._id;
+				var songName = song.metadata.song;
+				str += '['+index+'] '+ songName;
+			});
+			cb(nick,str);
+			return;
+		});
 	}
 	else
 	{
@@ -50,19 +76,8 @@ DoChatCommand = function(text) {
 					bot.playlistAll(function(data){console.log(data);});
 				});
 			}
-			else if (command[1] == "List Queue")
-			{
-				bot.playlistAll(function(data){
-					var songList = data.list;
-					var str = "Response: ";
-					songList.forEach(function(song, index) {
-						var thisSong = song._id;
-						var songName = song.metadata.song;
-						str += '['+index+'] '+ songName;
-					});
-					return(str);
-				});
-			}
+			
 		}
 	}
+	cb(nick,str);
 };

@@ -43,6 +43,7 @@ djQueue = [];
 djList = [];
 
 require('./chat.js');
+require('./myQueue.js');
 require('./functions.js');
 
 bot.on('newsong', OnNewsong); 

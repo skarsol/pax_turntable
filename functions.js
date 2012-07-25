@@ -65,7 +65,15 @@ OnEndsong = function(data) {
 	var upvotes = meta.upvotes;
 	var downvotes = meta.downvotes;
 	var listeners = meta.listeners;
-
+	
+	var room = data.room.metadata;
+	var songPlayer = room.current_dj;
+	
+	var myID = nconf.get('USERID');
+	if(songPlayer == myID){
+		RemLastSongFromQueue();
+	}
+	
 	if(pid == -1 || sid == -1) return;
 
 	var str = "insert into plays (player,song,upvotes,downvotes,audience) values ("+pid+","+sid+","+upvotes+","+downvotes+","+listeners+")";
@@ -82,7 +90,10 @@ OnNewsong = function(data) {
 	var songArtist = song.metadata.artist;
 	var songPlayer = room.current_dj;
 
-
+	var myID = nconf.get('USERID');
+	if(songPlayer == myID){
+		AddRandomSong();
+	}
 	var str = "insert into songs (name,artist,songid) values (" + connection.escape(songTitle) + "," + connection.escape(songArtist)+ "," + connection.escape(songID) + ") on duplicate key update id=LAST_INSERT_ID(id), lastHeard = now()";
 	//console.log("Query: "+ str);
 	connection.query(str, function(err,rows) {
