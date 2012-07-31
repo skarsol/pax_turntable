@@ -7,7 +7,7 @@ RemLastSongFromQueue = function() {
 }
 
 AddRandomSong = function() {
-	var str = "SELECT songid FROM `songs` WHERE id >= (SELECT FLOOR( MAX(id) * RAND()) FROM `songs` ) ORDER BY id LIMIT 1;";
+	var str = "select songid from songs where id in (SELECT distinct(id) FROM `plays` where upvotes > 0)  and lastHeard < date_sub(now(), interval 1 day) ORDER BY rand() LIMIT 1";
 	//console.log("Query: "+ str);
 	connection.query(str, function(err,rows) {
 		var songid = rows[0].songid;

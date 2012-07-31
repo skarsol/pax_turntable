@@ -7,6 +7,7 @@ var songDBID = -1;
 OnAddDJ = function(data) {
 	var playerName = data.user[0].name;
 	var userid = data.user[0].userid;
+
 	if(nconf.get('enforceQueue'))
 	{
 		if(djQueue.length > 0 && djList.length >= 4)
@@ -25,6 +26,14 @@ OnAddDJ = function(data) {
 		}
 	}
 	djList.push(data.user[0]);
+
+	if(nconf.get('autodj'))
+	{
+		if(djList.length > 3)
+		{
+			bot.remDj();
+		}
+	}
 	//console.log(JSON.stringify(djList));
 	//var str = '\u0002' + playerName + '\u000F is now on the decks!';
 	//client.say(nconf.get('ircroom,str'));
@@ -35,7 +44,7 @@ OnAddDJ = function(data) {
 OnRemDJ = function(data) {
 	var playerName = data.user[0].name;
 	var userid = data.user[0].userid;
-	
+
 	var newList = djList;
 	djList.forEach(function(dj, index) {
 		if(dj.userid == userid){
@@ -43,7 +52,15 @@ OnRemDJ = function(data) {
 		}
 	});
 	djList = newList;
-	//console.log(JSON.stringify(djList));
+	console.log(JSON.stringify(djList));
+	if(nconf.get('autodj'))
+	{
+		if(djList.length <= 2)
+		{
+			bot.addDj();
+			bot.speak("Starting to AutoDJ. If you do not want this, '!dj Auto'");
+		}
+	}
 	//var str = '\u0002' + playerName + '\u000F has given up!';
 	//client.say(nconf.get('ircroom,str'));
 };
@@ -65,15 +82,15 @@ OnEndsong = function(data) {
 	var upvotes = meta.upvotes;
 	var downvotes = meta.downvotes;
 	var listeners = meta.listeners;
-	
+
 	var room = data.room.metadata;
 	var songPlayer = room.current_dj;
-	
+
 	var myID = nconf.get('USERID');
 	if(songPlayer == myID){
 		RemLastSongFromQueue();
 	}
-	
+
 	if(pid == -1 || sid == -1) return;
 
 	var str = "insert into plays (player,song,upvotes,downvotes,audience) values ("+pid+","+sid+","+upvotes+","+downvotes+","+listeners+")";
@@ -106,7 +123,7 @@ OnNewsong = function(data) {
 	bot.getProfile(songPlayer,function(profile) {
 		var playerName = profile.name;
 		var str = nconf.get('irctopic');
-		if(nconf.get('verbose')) 
+		if(nconf.get('verbose'))
 		{
 			var str = nconf.get('ttlink') + ' - \u0002' + songTitle + '\u000F (\u0002' + songArtist + '\u000F) - \u0002' + playerName + '\u000F';
 			//client.say(nconf.get('ircroom'),str);<br>
@@ -126,31 +143,13 @@ OnNewsong = function(data) {
 OnRoomChanged = function(data) {
 	data.room.metadata.djs.forEach(function(dj) {
 		bot.getProfile(dj, function(profile) {
-			djList.push(profile); 
+			djList.push(profile);
 			//console.log(JSON.stringify(djList));
 		});
 	});
 };
 OnRegistered = function(data) {};
 OnDeregistered = function(data) {};
-OnSpeak = function(data) {
-	var userid = data.userid;
-	var nick = data.name;
-	var text = data.text;
-	
-	var isValidCommand = text.match(/^!dj (.+)/i);
-	if(isValidCommand)
-		{
-			if(isValidCommand[1] == "q+") AddToQueue(data);
-			else if(isValidCommand[1] == "q-") RemFromQueue(data);
-			else {		
-			DoChatCommand(userid, isValidCommand[1], function(userid, response) {
-				bot.pm(response,userid);
-			});
-			}
-			
-		}
-};
 OnUpdateVotes = function(data) {};
 OnBootedUser = function(data) {};
 OnUpdateUser = function(data) {};
@@ -180,7 +179,64 @@ IsNextDJ = function(userid) {
 	else return false;
 }
 
+OnSpeak = function(data) {
+	var userid = data.userid;
+	var nick = data.name;
+	var text = data.text;
 
+	var isValidCommand = text.match(/^!dj (.+)/i);
+	if(isValidCommand)
+	{
+		if(isValidCommand[1] == "q+") AddToQueue(data);
+		else if(isValidCommand[1] == "q-") RemFromQueue(data);
+		else if(isValidCommand[1] == 'Auto')
+		{
+			if(nconf.get('autodj'))
+			{
+				nconf.set('autodj',false);
+				str = "AutoDJ Turned OFF!";
+				bot.remDj();
+			}
+			else
+			{
+				nconf.set('autodj',true);
+				str = "AutoDJ Turned ON!";
+			}
+			bot.speak(str);			
+		}
+		else if(isValidCommand[1] == 'Begin DJ')
+		{
+			if(nconf.get('autodj'))
+			{
+				var response = "AutoDJ is turned on, sorry. '!dj Auto' to turn it off."
+				bot.pm(response,userid);
+			}
+			else {
+				bot.addDj();
+				str = "Starting to DJ!";
+			}
+		}
+		else if(isValidCommand[1] == 'Stop DJ')
+		{
+			if(nconf.get('autodj'))
+			{
+				var response = "AutoDJ is turned on, sorry. '!dj Auto' to turn it off."
+				bot.pm(response,userid);
+			}
+			else
+			{
+				bot.remDj();
+				str = "Not gonna DJ no mo'!";
+			}
+		}
+		else {
+			DoChatCommand(userid, isValidCommand[1], function(userid, response) {
+				bot.pm(response,userid);
+			});
+		}
+
+	}
+};
 
 // Fires when a PM is sent to the bot on IRC.
 OnIRCChat = function(nick,text,message) {
@@ -194,7 +250,7 @@ OnIRCChat = function(nick,text,message) {
 			DoChatCommand(nick, isValidCommand[1], function(nick, response) {
 				client.say(nick,response);
 			});
-			
+
 		}
 	}
 };
