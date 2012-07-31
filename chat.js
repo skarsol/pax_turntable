@@ -1,27 +1,28 @@
 DoChatCommand = function(nick, text, cb) {
 	var str = "I did nothing!";
+	var tLower = text.toLowerCase();
 	
-	if(text == 'Begin DJ')
+	if(tLower == 'begin dj')
 	{
 		bot.addDj();
 		str = "Starting to DJ!";
 	}
-	else if(text == 'Stop DJ')
+	else if(tLower == 'stop dj')
 	{
 		bot.remDj();
 		str = "Not gonna DJ no mo'!";
 	}
-	else if(text == 'Add Song')
+	else if(tLower == 'add song')
 	{
 		AddRandomSong();
 		str = "Adding a song.";
 	}
-	else if(text == 'Rem Song')
+	else if(tLower == 'rem song')
 	{
 		RemLastSongFromQueue();
 		str = "Removing a song.";
 	}
-	else if(text == "Auth User")
+	else if(tLower == "auth user")
 	{
 		console.log("Adding user "+ command[2] + " by " + nick);
 		var tempUsers = nconf.get('authUsers');
@@ -29,7 +30,7 @@ DoChatCommand = function(nick, text, cb) {
 		nconf.set('authUsers', tempUsers);
 		str = "Added " + command[2] + " to the Authorized Users list.";
 	}
-	else if(text == "Deauth User")
+	else if(tLower == "deauth user")
 	{
 		console.log("Removing user "+ command[2] + " by " + nick);
 		var tempUsers = nconf.get('authUsers');
@@ -38,21 +39,21 @@ DoChatCommand = function(nick, text, cb) {
 		nconf.set('authUsers', tempUsers);
 		str = "Removed " + command[2] + " from the Authorized Users list.";
 	}
-	else if(text == "User List")
+	else if(tLower == "user list")
 	{
 		str = nconf.get('authUsers').join();
 	}
-	else if(text == "Mute")
+	else if(tLower == "mute")
 	{
 		nconf.set('verbose',false);
 		str = "Muted";
 	}
-	else if(text == "Unmute")
+	else if(tLower == "unmute")
 	{
 		nconf.set('verbose',true);
 		str = "Unmuted";
 	}
-	else if(text == "List Queue")
+	else if(tLower == "list queue")
 	{
 		bot.playlistAll(function(data){
 			var songList = data.list;

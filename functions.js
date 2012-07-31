@@ -187,9 +187,10 @@ OnSpeak = function(data) {
 	var isValidCommand = text.match(/^!dj (.+)/i);
 	if(isValidCommand)
 	{
-		if(isValidCommand[1] == "q+") AddToQueue(data);
-		else if(isValidCommand[1] == "q-") RemFromQueue(data);
-		else if(isValidCommand[1] == 'Auto')
+		var tLower = isValidCommand[1].toLowerCase();
+		if(tLower == "q+") AddToQueue(data);
+		else if(tLower == "q-") RemFromQueue(data);
+		else if(tLower == 'auto')
 		{
 			if(nconf.get('autodj'))
 			{
@@ -204,7 +205,7 @@ OnSpeak = function(data) {
 			}
 			bot.speak(str);			
 		}
-		else if(isValidCommand[1] == 'Begin DJ')
+		else if(tLower == 'begin dj')
 		{
 			if(nconf.get('autodj'))
 			{
@@ -216,7 +217,7 @@ OnSpeak = function(data) {
 				str = "Starting to DJ!";
 			}
 		}
-		else if(isValidCommand[1] == 'Stop DJ')
+		else if(tLower == 'stop dj')
 		{
 			if(nconf.get('autodj'))
 			{
